@@ -41,6 +41,60 @@ a {
   }
 }
 
+/* Main App Layout Styles */
+.birthday-calendar-app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  min-height: 100vh;
+}
+
+.birthday-calendar-app header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.birthday-calendar-app h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin-bottom: 0.5rem;
+}
+
+.birthday-calendar-app header p {
+  font-size: 1.125rem;
+  color: #6b7280;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.birthday-calendar-app main {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+@media (max-width: 768px) {
+  .birthday-calendar-app {
+    padding: 1rem;
+  }
+
+  .birthday-calendar-app h1 {
+    font-size: 2rem;
+  }
+
+  .birthday-calendar-app header p {
+    font-size: 1rem;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .birthday-calendar-app header p {
+    color: #9ca3af;
+  }
+}
+
 /* InputSection Component Styles */
 .input-section {
   display: flex;
