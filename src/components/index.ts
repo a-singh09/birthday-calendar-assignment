@@ -7,4 +7,5 @@ export * from "../types";
 
 // Component exports
 export { InputSection } from "./InputSection";
+export { CalendarSection } from "./CalendarSection";
 // Additional components will be exported as they are implemented

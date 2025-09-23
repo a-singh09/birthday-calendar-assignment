@@ -1,18 +1,55 @@
 /**
- * InputSection component exports
- * Placeholder implementation for App component integration
+ * InputSection component for JSON input and year selection
  */
 
 import type { InputSectionProps } from "../../types";
 
-// Placeholder InputSection component
-export function InputSection(props: InputSectionProps) {
+export function InputSection({
+  jsonInput,
+  selectedYear,
+  jsonError,
+  availableYears,
+  onJsonChange,
+  onYearChange,
+}: InputSectionProps) {
   return (
     <div className="input-section">
-      <h2>Input Section</h2>
-      <p>JSON Input: {props.jsonInput}</p>
-      <p>Selected Year: {props.selectedYear}</p>
-      {props.jsonError && <p>Error: {props.jsonError}</p>}
+      <div className="input-group">
+        <label htmlFor="json-input" className="input-label">
+          Birthday Data (JSON)
+        </label>
+        <textarea
+          id="json-input"
+          className={`json-textarea ${jsonError ? "error" : ""}`}
+          value={jsonInput}
+          onChange={(e) => onJsonChange(e.target.value)}
+          placeholder='[{"name": "John Doe", "birthday": "1990-06-15"}]'
+          rows={8}
+        />
+        {jsonError && (
+          <div className="error-message" role="alert">
+            {jsonError}
+          </div>
+        )}
+      </div>
+
+      <div className="input-group">
+        <label htmlFor="year-select" className="input-label">
+          Select Year
+        </label>
+        <select
+          id="year-select"
+          className="year-dropdown"
+          value={selectedYear}
+          onChange={(e) => onYearChange(parseInt(e.target.value, 10))}
+        >
+          {availableYears.map((year) => (
+            <option key={year} value={year}>
+              {year}
+            </option>
+          ))}
+        </select>
+      </div>
     </div>
   );
 }
