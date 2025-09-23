@@ -2,7 +2,13 @@
  * Utility functions for the Birthday Calendar application
  */
 
-import type { ParseResult } from "../types";
+import type {
+  ParseResult,
+  Person,
+  ProcessedPerson,
+  CalendarData,
+} from "../types";
+import { COLOR_PALETTE } from "../constants";
 
 /**
  * Calculate day of week for a given birthday in a specific year
@@ -226,4 +232,97 @@ export function parsePersonsJson(
     success: true,
     data: validatedPeople,
   };
+}
+
+/**
+ * Transform a Person array into ProcessedPerson array with age, day of week, and color
+ * @param people - Array of Person objects
+ * @param year - The year to calculate ages and day of week for
+ * @returns Array of ProcessedPerson objects
+ */
+export function processPersons(
+  people: Person[],
+  year: number,
+): ProcessedPerson[] {
+  return people.map((person, index) => ({
+    ...person,
+    age: calculateAge(person.birthday, year),
+    dayOfWeek: getDayOfWeek(person.birthday, year),
+    color: COLOR_PALETTE[index % COLOR_PALETTE.length],
+  }));
+}
+
+/**
+ * Sort people by age within each day (youngest first)
+ * @param people - Array of ProcessedPerson objects
+ * @returns Array sorted by age (youngest first)
+ */
+export function sortPeopleByAge(people: ProcessedPerson[]): ProcessedPerson[] {
+  return [...people].sort((a, b) => a.age - b.age);
+}
+
+/**
+ * Assign colors to people within each day of the week
+ * Colors are assigned cyclically from the color palette within each day
+ * @param peopleByDay - Object mapping day index to array of people
+ * @returns Object with people having updated colors
+ */
+export function assignColorsWithinDays(peopleByDay: {
+  [dayIndex: number]: ProcessedPerson[];
+}): { [dayIndex: number]: ProcessedPerson[] } {
+  const result: { [dayIndex: number]: ProcessedPerson[] } = {};
+
+  Object.keys(peopleByDay).forEach((dayKey) => {
+    const dayIndex = parseInt(dayKey);
+    const people = peopleByDay[dayIndex];
+
+    result[dayIndex] = people.map((person, index) => ({
+      ...person,
+      color: COLOR_PALETTE[index % COLOR_PALETTE.length],
+    }));
+  });
+
+  return result;
+}
+
+/**
+ * Organize processed people into CalendarData structure
+ * Groups people by day of week, sorts by age within each day, and assigns colors
+ * @param people - Array of Person objects
+ * @param year - The year to calculate ages and day of week for
+ * @returns CalendarData object with people organized by day of week
+ */
+export function organizeIntoCalendarData(
+  people: Person[],
+  year: number,
+): CalendarData {
+  // First, process all people to get age and day of week
+  const processedPeople = processPersons(people, year);
+
+  // Group people by day of week
+  const peopleByDay: { [dayIndex: number]: ProcessedPerson[] } = {};
+
+  // Initialize all days as empty arrays
+  for (let i = 0; i < 7; i++) {
+    peopleByDay[i] = [];
+  }
+
+  // Group people by their day of week
+  processedPeople.forEach((person) => {
+    peopleByDay[person.dayOfWeek].push(person);
+  });
+
+  // Sort people by age within each day and assign colors
+  Object.keys(peopleByDay).forEach((dayKey) => {
+    const dayIndex = parseInt(dayKey);
+    if (peopleByDay[dayIndex].length > 0) {
+      // Sort by age (youngest first)
+      peopleByDay[dayIndex] = sortPeopleByAge(peopleByDay[dayIndex]);
+    }
+  });
+
+  // Assign colors within each day
+  const calendarData = assignColorsWithinDays(peopleByDay);
+
+  return calendarData;
 }
