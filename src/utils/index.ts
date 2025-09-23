@@ -324,6 +324,47 @@ export function calculateSquareSize(
 }
 
 /**
+ * Get initials from a person's name
+ * @param name - Full name of the person
+ * @returns Initials (up to 2 characters)
+ */
+export function getInitials(name: string): string {
+  if (!name || name.trim().length === 0) {
+    return "?";
+  }
+
+  const words = name.trim().split(/\s+/);
+
+  if (words.length === 1) {
+    // Single name - take first 2 characters
+    return words[0].substring(0, 2).toUpperCase();
+  }
+
+  // Multiple words - take first letter of first two words
+  return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
+}
+
+/**
+ * Format date of birth for display in tooltip
+ * @param birthday - Date string in YYYY-MM-DD format
+ * @returns Formatted date string
+ */
+export function formatDateOfBirth(birthday: string): string {
+  try {
+    const [year, month, day] = birthday.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
+
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  } catch {
+    return birthday; // Fallback to original format if parsing fails
+  }
+}
+
+/**
  * Organize processed people into CalendarData structure
  * Groups people by day of week, sorts by age within each day, and assigns colors
  * @param people - Array of Person objects

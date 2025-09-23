@@ -23,7 +23,7 @@ export function InputSection({
           className={`json-textarea ${jsonError ? "error" : ""}`}
           value={jsonInput}
           onChange={(e) => onJsonChange(e.target.value)}
-          placeholder='[{"name": "John Doe", "birthday": "1990-06-15"}]'
+          placeholder='[{"name": "Tyrion Lannister", "birthday": "1978-12-02"}]'
           rows={8}
         />
         {jsonError && (

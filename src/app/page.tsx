@@ -8,10 +8,19 @@ import { InputSection } from "../components/InputSection";
 import { CalendarSection } from "../components/CalendarSection";
 
 export default function BirthdayCalendar() {
+  // Default JSON data
+  const defaultJsonData =
+    '[{"name": "Tyrion Lannister", "birthday": "1978-12-02"}]';
+
+  // Parse default data for initial people state
+  const defaultPeople = parsePersonsJson(defaultJsonData);
+
   // Initialize state with default values
-  const [people, setPeople] = useState<Person[]>([]);
+  const [people, setPeople] = useState<Person[]>(
+    defaultPeople.success && defaultPeople.data ? defaultPeople.data : [],
+  );
   const [selectedYear, setSelectedYear] = useState<number>(CURRENT_YEAR);
-  const [jsonInput, setJsonInput] = useState<string>("");
+  const [jsonInput, setJsonInput] = useState<string>(defaultJsonData);
   const [jsonError, setJsonError] = useState<string | null>(null);
 
   // Generate available years array
