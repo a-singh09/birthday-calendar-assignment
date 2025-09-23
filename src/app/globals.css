@@ -373,8 +373,8 @@ a {
 .calendar-container {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 1.25rem;
-  padding: 2rem;
+  gap: 1rem;
+  padding: 1.5rem;
   background: var(--glass-bg);
   backdrop-filter: var(--backdrop-blur);
   -webkit-backdrop-filter: var(--backdrop-blur);
@@ -383,17 +383,20 @@ a {
   box-shadow: var(--card-shadow);
   position: relative;
   overflow: visible;
+  z-index: 1;
+  /* Lower z-index than tooltips */
 }
 
 .calendar-container::before {
   content: '';
   position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
+  left: 1.5rem;
+  right: 1.5rem;
   height: 3px;
   background: var(--primary-gradient);
   opacity: 0.8;
+  border-radius: 1.5px;
 }
 
 .day-column {
@@ -453,20 +456,22 @@ a {
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
+  /* Allow tooltips to show */
 }
 
 .day-column-grid::before {
   content: '';
   position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
+  left: 8px;
+  right: 8px;
   height: 2px;
   background: var(--secondary-gradient);
   opacity: 0.6;
   transform: scaleX(0);
   transition: transform 0.3s ease;
+  border-radius: 1px;
 }
 
 .day-column-grid:hover::before {
@@ -485,27 +490,31 @@ a {
 
 .day-header-grid {
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   color: var(--foreground);
-  margin-bottom: 1rem;
-  padding-bottom: 0.75rem;
+  margin: 0;
+  padding: 0.75rem 0.5rem;
   border-bottom: 2px solid transparent;
   background: linear-gradient(90deg, var(--accent-gradient)) border-box;
   border-image: linear-gradient(90deg, rgba(79, 172, 254, 0.3), rgba(0, 242, 254, 0.3)) 1;
   text-align: center;
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  font-size: 0.85rem;
+  flex-shrink: 0;
 }
 
 .person-grid-container {
   flex: 1;
   display: grid;
-  gap: 3px;
-  padding: 8px;
+  gap: 8px;
+  padding: 12px;
   align-content: start;
-  grid-auto-rows: 1fr;
+  grid-auto-rows: minmax(40px, 1fr);
   min-height: 140px;
+  overflow: visible;
+  /* Allow tooltips to show */
+  justify-items: stretch;
+  align-items: stretch;
 }
 
 .empty-grid-message {
@@ -513,8 +522,12 @@ a {
   text-align: center;
   color: #6b7280;
   font-style: italic;
-  font-size: 0.875rem;
-  padding: 1rem;
+  font-size: 0.75rem;
+  padding: 2rem 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
 }
 
 .day-header {
@@ -547,7 +560,6 @@ a {
 }
 
 .person-square {
-  aspect-ratio: 1;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -557,11 +569,28 @@ a {
   color: white;
   font-size: 0.8rem;
   font-weight: 600;
-  min-height: 45px;
+  min-height: 40px;
   position: relative;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  width: 100%;
+  height: 100%;
+}
+
+/* Special styling for single column layouts (1-3 people) */
+.person-grid-container[style*="repeat(1,"] .person-square {
+  min-height: 50px;
+  border-radius: 16px;
+}
+
+/* Larger text for fewer people */
+.person-grid-container[style*="repeat(1,"] .person-initials {
+  font-size: 1.1rem !important;
+}
+
+.person-grid-container[style*="repeat(2,"] .person-initials {
+  font-size: 0.9rem !important;
 }
 
 .person-square::before {
@@ -796,71 +825,79 @@ ooltips to escape container bounds */
 .person-square-wrapper {
   position: relative;
   display: inline-block;
+  width: 100%;
+  height: 100%;
 }
 
-/* Tooltip container */
-.tooltip {
+/* CSS-only tooltip using data attribute */
+.person-square-wrapper::before {
+  content: attr(data-tooltip);
   position: absolute;
   bottom: 100%;
   left: 50%;
   transform: translateX(-50%) translateY(-8px);
   background-color: rgba(0, 0, 0, 0.9);
   color: white;
-  padding: 10px 14px;
-  border-radius: 8px;
-  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 11px;
   font-weight: 500;
   white-space: pre-line;
   text-align: center;
-  z-index: 10000;
+  z-index: 99999;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.2s ease, visibility 0.2s ease;
-  line-height: 1.4;
-  min-width: 140px;
-  max-width: 180px;
+  line-height: 1.3;
+  min-width: 120px;
+  max-width: 160px;
 }
 
 /* Tooltip arrow */
-.tooltip::after {
+.person-square-wrapper::after {
   content: '';
   position: absolute;
-  top: 100%;
+  bottom: 100%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(-4px);
   width: 0;
   height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-top: 5px solid rgba(0, 0, 0, 0.9);
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid rgba(0, 0, 0, 0.9);
+  z-index: 99999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
 }
 
 /* Show tooltip on hover */
-.person-square-wrapper:hover .tooltip {
+.person-square-wrapper:hover::before,
+.person-square-wrapper:hover::after {
   opacity: 1;
   visibility: visible;
 }
 
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
-  .tooltip {
+  .person-square-wrapper::before {
     background-color: rgba(17, 24, 39, 0.95);
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
-  .tooltip::after {
+  .person-square-wrapper::after {
     border-top-color: rgba(17, 24, 39, 0.95);
   }
 }
 
 /* Mobile adjustments */
 @media (max-width: 768px) {
-  .tooltip {
-    font-size: 12px;
-    padding: 8px 12px;
-    min-width: 120px;
-    max-width: 160px;
+  .person-square-wrapper::before {
+    font-size: 10px;
+    padding: 6px 10px;
+    min-width: 100px;
+    max-width: 140px;
   }
 }

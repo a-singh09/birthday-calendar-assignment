@@ -8,16 +8,19 @@ import type { DayColumnProps } from "../../types";
 import { PersonSquare } from "../";
 
 export function DayColumn({ dayName, people, isEmpty }: DayColumnProps) {
-  // Calculate optimal grid layout based on number of people
-  const getGridColumns = (count: number) => {
-    if (count <= 2) return 2;
-    if (count <= 4) return 2;
-    if (count <= 6) return 3;
-    if (count <= 9) return 3;
-    return 4;
+  // Calculate optimal grid layout and size based on number of people
+  const getGridConfig = (count: number) => {
+    if (count === 1) return { columns: 1, size: 80 }; // Single person takes full width
+    if (count === 2) return { columns: 1, size: 55 }; // Two people stack vertically, larger
+    if (count === 3) return { columns: 1, size: 45 }; // Three people stack vertically
+    if (count === 4) return { columns: 2, size: 45 }; // 2x2 grid
+    if (count <= 6) return { columns: 2, size: 38 }; // 2x3 grid
+    if (count <= 9) return { columns: 3, size: 32 }; // 3x3 grid
+    if (count <= 12) return { columns: 3, size: 28 }; // 3x4 grid
+    return { columns: 4, size: 25 }; // 4+ columns for many people
   };
 
-  const gridColumns = getGridColumns(people.length);
+  const { columns, size } = getGridConfig(people.length);
 
   return (
     <div
@@ -37,7 +40,7 @@ export function DayColumn({ dayName, people, isEmpty }: DayColumnProps) {
       <div
         className="person-grid-container"
         style={{
-          gridTemplateColumns: `repeat(${gridColumns}, 1fr)`,
+          gridTemplateColumns: `repeat(${columns}, 1fr)`,
         }}
         role="group"
         aria-label={
@@ -51,7 +54,7 @@ export function DayColumn({ dayName, people, isEmpty }: DayColumnProps) {
       >
         {isEmpty ? (
           <div className="empty-grid-message" aria-live="polite" role="status">
-            {/* Empty state - no visual content needed */}
+            No birthdays
           </div>
         ) : (
           <>
@@ -63,7 +66,7 @@ export function DayColumn({ dayName, people, isEmpty }: DayColumnProps) {
               <PersonSquare
                 key={`${person.name}-${personIndex}`}
                 person={person}
-                size={45} // Fixed size for grid layout
+                size={size} // Responsive size based on count
               />
             ))}
           </>

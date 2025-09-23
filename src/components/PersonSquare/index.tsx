@@ -4,17 +4,23 @@
  * Displays person initials and shows detailed tooltip on hover
  */
 
-import React from "react";
+import React, { useRef, useState } from "react";
 import { PersonSquareProps } from "../../types";
 import { getInitials, formatDateOfBirth } from "../../utils";
 
 const PersonSquare: React.FC<PersonSquareProps> = ({ person, size }) => {
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const squareRef = useRef<HTMLDivElement>(null);
+
+  // Use responsive size for font scaling
+  const actualSize = Math.max(Math.min(size, 80), 30);
+
   const squareStyle: React.CSSProperties = {
-    width: `${size}px`,
-    height: `${size}px`,
     backgroundColor: person.color,
-    "--square-size": `${size}px`,
-  } as React.CSSProperties & { "--square-size": string };
+    minHeight: `${actualSize}px`,
+    width: "100%",
+    height: "100%",
+  };
 
   // Get initials for display
   const initials = getInitials(person.name);
@@ -25,9 +31,20 @@ const PersonSquare: React.FC<PersonSquareProps> = ({ person, size }) => {
   // Detailed tooltip content with better formatting
   const detailedTooltip = `${person.name}\n${formatDateOfBirth(person.birthday)}\nAge: ${person.age}`;
 
+  const handleMouseEnter = (e: React.MouseEvent) => {
+    if (squareRef.current) {
+      const rect = squareRef.current.getBoundingClientRect();
+      setTooltipPosition({
+        x: rect.left + rect.width / 2,
+        y: rect.top,
+      });
+    }
+  };
+
   return (
-    <div className="person-square-wrapper">
+    <div className="person-square-wrapper" data-tooltip={detailedTooltip}>
       <div
+        ref={squareRef}
         className="person-square"
         style={squareStyle}
         title={tooltipText}
@@ -44,7 +61,7 @@ const PersonSquare: React.FC<PersonSquareProps> = ({ person, size }) => {
         <span
           className="person-initials"
           style={{
-            fontSize: `${Math.max(size * 0.3, 10)}px`,
+            fontSize: `${Math.max(actualSize * 0.35, 8)}px`,
             fontWeight: "700",
             color: "white",
             textShadow: "0 1px 2px rgba(0, 0, 0, 0.3)",
@@ -55,7 +72,6 @@ const PersonSquare: React.FC<PersonSquareProps> = ({ person, size }) => {
           {initials}
         </span>
       </div>
-      <div className="tooltip">{detailedTooltip}</div>
     </div>
   );
 };
