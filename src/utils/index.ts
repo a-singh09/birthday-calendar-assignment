@@ -88,7 +88,7 @@ export function getDaysInMonth(year: number, month: number): number {
  * @returns Validation result with error message if invalid
  */
 export function validatePerson(
-  obj: any,
+  obj: unknown,
 ): ParseResult<{ name: string; birthday: string }> {
   // Check if obj is an object
   if (!obj || typeof obj !== "object") {
@@ -98,30 +98,37 @@ export function validatePerson(
     };
   }
 
+  // Type guard to check if obj has the required properties
+  const hasName = "name" in obj;
+  const hasBirthday = "birthday" in obj;
+
   // Check required fields exist
-  if (!obj.hasOwnProperty("name")) {
+  if (!hasName) {
     return {
       success: false,
       error: 'Person must have a "name" field',
     };
   }
 
-  if (!obj.hasOwnProperty("birthday")) {
+  if (!hasBirthday) {
     return {
       success: false,
       error: 'Person must have a "birthday" field',
     };
   }
 
+  // Cast to record type for property access
+  const record = obj as Record<string, unknown>;
+
   // Check field types
-  if (typeof obj.name !== "string") {
+  if (typeof record.name !== "string") {
     return {
       success: false,
       error: "Person name must be a string",
     };
   }
 
-  if (typeof obj.birthday !== "string") {
+  if (typeof record.birthday !== "string") {
     return {
       success: false,
       error: "Person birthday must be a string",
@@ -129,7 +136,7 @@ export function validatePerson(
   }
 
   // Check name is not empty
-  if (obj.name.trim().length === 0) {
+  if (record.name.trim().length === 0) {
     return {
       success: false,
       error: "Person name cannot be empty",
@@ -137,18 +144,18 @@ export function validatePerson(
   }
 
   // Validate birthday format
-  if (!isValidDateFormat(obj.birthday)) {
+  if (!isValidDateFormat(record.birthday)) {
     return {
       success: false,
-      error: `Invalid birthday format "${obj.birthday}". Expected YYYY-MM-DD format with valid date`,
+      error: `Invalid birthday format "${record.birthday}". Expected YYYY-MM-DD format with valid date`,
     };
   }
 
   return {
     success: true,
     data: {
-      name: obj.name.trim(),
-      birthday: obj.birthday,
+      name: record.name.trim(),
+      birthday: record.birthday,
     },
   };
 }
@@ -169,7 +176,7 @@ export function parsePersonsJson(
     };
   }
 
-  let parsed: any;
+  let parsed: unknown;
 
   // Try to parse JSON
   try {

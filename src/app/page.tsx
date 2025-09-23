@@ -1,95 +1,96 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
 
-export default function Home() {
+import { useState, useCallback, useMemo } from "react";
+import type { Person, CalendarData } from "../types";
+import { parsePersonsJson, organizeIntoCalendarData } from "../utils";
+import { CURRENT_YEAR, MIN_YEAR } from "../constants";
+import { InputSection } from "../components/InputSection";
+import { CalendarSection } from "../components/CalendarSection";
+
+export default function BirthdayCalendar() {
+  // Initialize state with default values
+  const [people, setPeople] = useState<Person[]>([]);
+  const [selectedYear, setSelectedYear] = useState<number>(CURRENT_YEAR);
+  const [jsonInput, setJsonInput] = useState<string>("");
+  const [jsonError, setJsonError] = useState<string | null>(null);
+
+  // Generate available years array
+  const availableYears = useMemo(() => {
+    const years: number[] = [];
+    for (let year = CURRENT_YEAR; year >= MIN_YEAR; year--) {
+      years.push(year);
+    }
+    return years;
+  }, []);
+
+  // Calculate calendar data based on current people and selected year
+  const calendarData: CalendarData = useMemo(() => {
+    if (people.length === 0) {
+      // Return empty calendar data for all days
+      const emptyCalendar: CalendarData = {};
+      for (let i = 0; i < 7; i++) {
+        emptyCalendar[i] = [];
+      }
+      return emptyCalendar;
+    }
+
+    return organizeIntoCalendarData(people, selectedYear);
+  }, [people, selectedYear]);
+
+  // Handle JSON input changes with validation
+  const handleJsonChange = useCallback((json: string) => {
+    setJsonInput(json);
+
+    // Clear previous error
+    setJsonError(null);
+
+    // If input is empty, clear people and return
+    if (!json.trim()) {
+      setPeople([]);
+      return;
+    }
+
+    // Parse and validate JSON
+    const parseResult = parsePersonsJson(json);
+
+    if (parseResult.success && parseResult.data) {
+      // Successfully parsed - update people
+      setPeople(parseResult.data);
+      setJsonError(null);
+    } else {
+      // Parse failed - set error and keep previous people
+      setJsonError(parseResult.error || "Unknown parsing error");
+    }
+  }, []);
+
+  // Handle year selection changes
+  const handleYearChange = useCallback((year: number) => {
+    setSelectedYear(year);
+    // Calendar data will be recalculated automatically via useMemo
+  }, []);
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="birthday-calendar-app">
+      <header>
+        <h1>Birthday Calendar</h1>
+        <p>
+          Enter birthday data in JSON format and select a year to see when
+          birthdays fall on each day of the week.
+        </p>
+      </header>
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
+      <main>
+        <InputSection
+          jsonInput={jsonInput}
+          selectedYear={selectedYear}
+          jsonError={jsonError}
+          availableYears={availableYears}
+          onJsonChange={handleJsonChange}
+          onYearChange={handleYearChange}
+        />
+
+        <CalendarSection calendarData={calendarData} />
       </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }
