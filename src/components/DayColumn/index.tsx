@@ -8,19 +8,31 @@ import type { DayColumnProps } from "../../types";
 import { PersonSquare } from "../";
 
 export function DayColumn({ dayName, people, isEmpty }: DayColumnProps) {
-  // Calculate optimal grid layout and size based on number of people
-  const getGridConfig = (count: number) => {
-    if (count === 1) return { columns: 1, size: 80 }; // Single person takes full width
-    if (count === 2) return { columns: 1, size: 55 }; // Two people stack vertically, larger
-    if (count === 3) return { columns: 1, size: 45 }; // Three people stack vertically
-    if (count === 4) return { columns: 2, size: 45 }; // 2x2 grid
-    if (count <= 6) return { columns: 2, size: 38 }; // 2x3 grid
-    if (count <= 9) return { columns: 3, size: 32 }; // 3x3 grid
-    if (count <= 12) return { columns: 3, size: 28 }; // 3x4 grid
-    return { columns: 4, size: 25 }; // 4+ columns for many people
+  // Calculate optimal grid layout that maximizes square size while fitting all people
+  const getOptimalGridConfig = (count: number) => {
+    if (count === 0) return { columns: 1, rows: 1 };
+
+    // Find the grid configuration that minimizes wasted space
+    // while keeping squares as large as possible
+    let bestConfig = { columns: 1, rows: count };
+    let bestRatio = Number.MAX_SAFE_INTEGER;
+
+    // Try different column configurations
+    for (let cols = 1; cols <= Math.ceil(Math.sqrt(count * 1.5)); cols++) {
+      const rows = Math.ceil(count / cols);
+      const ratio = Math.max(cols, rows) / Math.min(cols, rows);
+
+      // Prefer configurations closer to square aspect ratio
+      if (ratio < bestRatio) {
+        bestConfig = { columns: cols, rows };
+        bestRatio = ratio;
+      }
+    }
+
+    return bestConfig;
   };
 
-  const { columns, size } = getGridConfig(people.length);
+  const { columns } = getOptimalGridConfig(people.length);
 
   return (
     <div
@@ -66,7 +78,7 @@ export function DayColumn({ dayName, people, isEmpty }: DayColumnProps) {
               <PersonSquare
                 key={`${person.name}-${personIndex}`}
                 person={person}
-                size={size} // Responsive size based on count
+                size={60} // Base size for font scaling
               />
             ))}
           </>

@@ -17,9 +17,9 @@ const PersonSquare: React.FC<PersonSquareProps> = ({ person, size }) => {
 
   const squareStyle: React.CSSProperties = {
     backgroundColor: person.color,
-    minHeight: `${actualSize}px`,
+    aspectRatio: "1",
     width: "100%",
-    height: "100%",
+    minHeight: `${actualSize}px`,
   };
 
   // Get initials for display
@@ -42,35 +42,37 @@ const PersonSquare: React.FC<PersonSquareProps> = ({ person, size }) => {
   };
 
   return (
-    <div className="person-square-wrapper" data-tooltip={detailedTooltip}>
-      <div
-        ref={squareRef}
-        className="person-square"
-        style={squareStyle}
-        title={tooltipText}
-        role="button"
-        tabIndex={0}
-        aria-label={`Birthday person: ${person.name}, age ${person.age}, born ${person.birthday}`}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            (e.target as HTMLElement).focus();
-          }
-        }}
-      >
-        <span
-          className="person-initials"
-          style={{
-            fontSize: `${Math.max(actualSize * 0.35, 8)}px`,
-            fontWeight: "700",
-            color: "white",
-            textShadow: "0 1px 2px rgba(0, 0, 0, 0.3)",
-            userSelect: "none",
-            pointerEvents: "none",
+    <div className="person-square-container">
+      <div className="person-square-wrapper" data-tooltip={detailedTooltip}>
+        <div
+          ref={squareRef}
+          className="person-square"
+          style={squareStyle}
+          title={tooltipText}
+          role="button"
+          tabIndex={0}
+          aria-label={`Birthday person: ${person.name}, age ${person.age}, born ${person.birthday}`}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              (e.target as HTMLElement).focus();
+            }
           }}
         >
-          {initials}
-        </span>
+          <span
+            className="person-initials"
+            style={{
+              fontSize: `${Math.max(actualSize * 0.3, 10)}px`,
+              fontWeight: "700",
+              color: "white",
+              textShadow: "0 1px 2px rgba(0, 0, 0, 0.3)",
+              userSelect: "none",
+              pointerEvents: "none",
+            }}
+          >
+            {initials}
+          </span>
+        </div>
       </div>
     </div>
   );

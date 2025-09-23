@@ -385,6 +385,9 @@ a {
   overflow: visible;
   z-index: 1;
   /* Lower z-index than tooltips */
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .calendar-container::before {
@@ -447,6 +450,7 @@ a {
   border: 1px solid var(--glass-border);
   border-radius: 16px;
   min-height: 200px;
+  max-height: 300px;
   padding: 0;
   background: var(--glass-bg);
   backdrop-filter: var(--backdrop-blur);
@@ -457,7 +461,8 @@ a {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   position: relative;
   overflow: visible;
-  /* Allow tooltips to show */
+  /* Allow tooltips to show outside */
+  width: 100%;
 }
 
 .day-column-grid::before {
@@ -490,10 +495,10 @@ a {
 
 .day-header-grid {
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: var(--foreground);
   margin: 0;
-  padding: 0.75rem 0.5rem;
+  padding: 0.5rem 0.25rem;
   border-bottom: 2px solid transparent;
   background: linear-gradient(90deg, var(--accent-gradient)) border-box;
   border-image: linear-gradient(90deg, rgba(79, 172, 254, 0.3), rgba(0, 242, 254, 0.3)) 1;
@@ -506,15 +511,16 @@ a {
 .person-grid-container {
   flex: 1;
   display: grid;
-  gap: 8px;
-  padding: 12px;
-  align-content: start;
-  grid-auto-rows: minmax(40px, 1fr);
-  min-height: 140px;
+  gap: 6px;
+  padding: 10px;
+  align-content: center;
+  justify-content: center;
+  grid-auto-rows: 1fr;
+  max-height: calc(100% - 20px);
   overflow: visible;
-  /* Allow tooltips to show */
-  justify-items: stretch;
-  align-items: stretch;
+  /* Allow tooltips to escape */
+  justify-items: center;
+  align-items: center;
 }
 
 .empty-grid-message {
@@ -569,28 +575,44 @@ a {
   color: white;
   font-size: 0.8rem;
   font-weight: 600;
-  min-height: 40px;
   position: relative;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  aspect-ratio: 1;
   width: 100%;
-  height: 100%;
+  height: auto;
+  max-width: 80px;
+  max-height: 80px;
 }
 
-/* Special styling for single column layouts (1-3 people) */
+/* Dynamic sizing based on grid columns */
 .person-grid-container[style*="repeat(1,"] .person-square {
-  min-height: 50px;
-  border-radius: 16px;
+  max-width: 120px;
+  max-height: 120px;
 }
 
-/* Larger text for fewer people */
 .person-grid-container[style*="repeat(1,"] .person-initials {
-  font-size: 1.1rem !important;
+  font-size: 1.4rem !important;
+}
+
+.person-grid-container[style*="repeat(2,"] .person-square {
+  max-width: 70px;
+  max-height: 70px;
 }
 
 .person-grid-container[style*="repeat(2,"] .person-initials {
-  font-size: 0.9rem !important;
+  font-size: 1rem !important;
+}
+
+.person-grid-container[style*="repeat(3,"] .person-square {
+  max-width: 50px;
+  max-height: 50px;
+}
+
+.person-grid-container[style*="repeat(4,"] .person-square {
+  max-width: 40px;
+  max-height: 40px;
 }
 
 .person-square::before {
@@ -654,29 +676,15 @@ a {
   padding: 1rem;
 }
 
-/* Person square container for tooltip positioning */
+/* Person square container for proper sizing and tooltip positioning */
 .person-square-container {
   position: relative;
-  display: inline-block;
-}
-
-/* Person initials styling */
-.person-initials {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  letter-spacing: -0.02em;
 }
-
-/* Custom tooltip styling */
-.person-tooltip {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
 
 /* Person initials styling */
 .person-initials {
@@ -754,13 +762,7 @@ a {
   }
 }
 
-/* Person square container for tooltip positioning */
-.person-square-container {
-  position: relative;
-  display: inline-block;
-}
-
-/* Person initials styling */
+/* Person initials styling (continued) */
 .person-initials {
   display: flex;
   align-items: center;
