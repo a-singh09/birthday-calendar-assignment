@@ -40,3 +40,111 @@ a {
     color-scheme: dark;
   }
 }
+
+/* InputSection Component Styles */
+.input-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: var(--background);
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-label {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--foreground);
+  margin-bottom: 0.25rem;
+}
+
+.json-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 0.75rem;
+  border: 2px solid #d1d5db;
+  border-radius: 6px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  resize: vertical;
+  background: var(--background);
+  color: var(--foreground);
+  transition: border-color 0.2s ease;
+}
+
+.json-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.json-textarea.error {
+  border-color: #ef4444;
+}
+
+.json-textarea.error:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.year-dropdown {
+  width: 200px;
+  padding: 0.75rem;
+  border: 2px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background: var(--background);
+  color: var(--foreground);
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.year-dropdown:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.error-message {
+  color: #ef4444;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.5rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 4px;
+  margin-top: 0.25rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .input-section {
+    border-color: #374151;
+  }
+
+  .json-textarea,
+  .year-dropdown {
+    border-color: #4b5563;
+    background: #1f2937;
+  }
+
+  .json-textarea:focus,
+  .year-dropdown:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+  }
+
+  .error-message {
+    background: #1f1917;
+    border-color: #7c2d12;
+    color: #fca5a5;
+  }
+}
