@@ -237,6 +237,64 @@ a {
   opacity: 0.8;
 }
 
+/* Accessibility utilities */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.empty-day-message {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #6b7280;
+  font-style: italic;
+  font-size: 0.875rem;
+  padding: 1rem;
+}
+
+/* Enhanced focus styles for accessibility */
+.person-square:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+}
+
+.person-square:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .person-square {
+    border: 2px solid currentColor;
+  }
+
+  .person-square:focus {
+    outline: 3px solid #000;
+    outline-offset: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .person-square {
+    transition: none;
+  }
+
+  .day-column {
+    transition: none;
+  }
+}
+
 @media (prefers-color-scheme: dark) {
   .calendar-container {
     border-color: #374151;
@@ -254,5 +312,20 @@ a {
 
   .day-header {
     border-bottom-color: #374151;
+  }
+
+  .empty-day-message {
+    color: #9ca3af;
+  }
+
+  .person-square:focus {
+    outline-color: #60a5fa;
+    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2);
+  }
+
+  @media (prefers-contrast: high) {
+    .person-square:focus {
+      outline-color: #fff;
+    }
   }
 }
