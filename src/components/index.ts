@@ -8,4 +8,5 @@ export * from "../types";
 // Component exports
 export { InputSection } from "./InputSection";
 export { CalendarSection } from "./CalendarSection";
+export { DayColumn } from "./DayColumn";
 // Additional components will be exported as they are implemented

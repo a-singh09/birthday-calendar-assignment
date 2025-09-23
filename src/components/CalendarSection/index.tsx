@@ -4,6 +4,7 @@
 
 import type { CalendarSectionProps } from "../../types";
 import { DAY_NAMES } from "../../constants";
+import { DayColumn } from "../DayColumn";
 
 export function CalendarSection({ calendarData }: CalendarSectionProps) {
   return (
@@ -13,24 +14,12 @@ export function CalendarSection({ calendarData }: CalendarSectionProps) {
         const isEmpty = people.length === 0;
 
         return (
-          <div
+          <DayColumn
             key={dayIndex}
-            className={`day-column ${isEmpty ? "day-empty" : ""}`}
-          >
-            <div className="day-header">{dayName}</div>
-            <div className="day-content">
-              {people.map((person, personIndex) => (
-                <div
-                  key={`${person.name}-${personIndex}`}
-                  className="person-placeholder"
-                  style={{ backgroundColor: person.color }}
-                  title={person.name}
-                >
-                  {/* PersonSquare component will be implemented in next task */}
-                </div>
-              ))}
-            </div>
-          </div>
+            dayName={dayName}
+            people={people}
+            isEmpty={isEmpty}
+          />
         );
       })}
     </div>

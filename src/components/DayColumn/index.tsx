@@ -2,8 +2,6 @@
  * DayColumn component - displays people for a specific day of the week
  */
 
-import { title } from "process";
-import style from "styled-jsx/style";
 import type { DayColumnProps } from "../../types";
 
 export function DayColumn({ dayName, people, isEmpty }: DayColumnProps) {
