@@ -49,3 +49,10 @@ export interface PersonSquareProps {
   person: ProcessedPerson;
   size: number; // calculated based on container and number of people
 }
+
+// Utility types
+export interface ParseResult<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
+}

@@ -5,6 +5,8 @@ import {
   isValidDateFormat,
   isLeapYear,
   getDaysInMonth,
+  validatePerson,
+  parsePersonsJson,
 } from "./index";
 
 describe("Date Calculation Utilities", () => {
@@ -180,6 +182,326 @@ describe("Date Calculation Utilities", () => {
       const dayNewYear = getDayOfWeek(newYear, 2024);
       const dayNewYearEve = getDayOfWeek(newYearEve, 2024);
       expect(dayNewYear).not.toBe(dayNewYearEve);
+    });
+  });
+});
+
+describe("JSON Parsing and Validation", () => {
+  describe("validatePerson", () => {
+    it("should validate correct person objects", () => {
+      const validPerson = {
+        name: "John Doe",
+        birthday: "1990-06-15",
+      };
+
+      const result = validatePerson(validPerson);
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        name: "John Doe",
+        birthday: "1990-06-15",
+      });
+      expect(result.error).toBeUndefined();
+    });
+
+    it("should trim whitespace from names", () => {
+      const personWithWhitespace = {
+        name: "  John Doe  ",
+        birthday: "1990-06-15",
+      };
+
+      const result = validatePerson(personWithWhitespace);
+      expect(result.success).toBe(true);
+      expect(result.data?.name).toBe("John Doe");
+    });
+
+    it("should reject non-object inputs", () => {
+      expect(validatePerson(null).success).toBe(false);
+      expect(validatePerson(undefined).success).toBe(false);
+      expect(validatePerson("string").success).toBe(false);
+      expect(validatePerson(123).success).toBe(false);
+      expect(validatePerson([]).success).toBe(false);
+    });
+
+    it("should reject objects missing required fields", () => {
+      const missingName = { birthday: "1990-06-15" };
+      const missingBirthday = { name: "John Doe" };
+      const emptyObject = {};
+
+      expect(validatePerson(missingName).success).toBe(false);
+      expect(validatePerson(missingName).error).toContain("name");
+
+      expect(validatePerson(missingBirthday).success).toBe(false);
+      expect(validatePerson(missingBirthday).error).toContain("birthday");
+
+      expect(validatePerson(emptyObject).success).toBe(false);
+    });
+
+    it("should reject invalid field types", () => {
+      const nameNotString = { name: 123, birthday: "1990-06-15" };
+      const birthdayNotString = { name: "John Doe", birthday: 123 };
+
+      expect(validatePerson(nameNotString).success).toBe(false);
+      expect(validatePerson(nameNotString).error).toContain("string");
+
+      expect(validatePerson(birthdayNotString).success).toBe(false);
+      expect(validatePerson(birthdayNotString).error).toContain("string");
+    });
+
+    it("should reject empty names", () => {
+      const emptyName = { name: "", birthday: "1990-06-15" };
+      const whitespaceName = { name: "   ", birthday: "1990-06-15" };
+
+      expect(validatePerson(emptyName).success).toBe(false);
+      expect(validatePerson(emptyName).error).toContain("empty");
+
+      expect(validatePerson(whitespaceName).success).toBe(false);
+      expect(validatePerson(whitespaceName).error).toContain("empty");
+    });
+
+    it("should reject invalid birthday formats", () => {
+      const invalidFormats = [
+        { name: "John", birthday: "90-06-15" },
+        { name: "John", birthday: "1990/06/15" },
+        { name: "John", birthday: "15-06-1990" },
+        { name: "John", birthday: "1990-6-15" },
+        { name: "John", birthday: "1990-06-32" },
+        { name: "John", birthday: "1990-13-15" },
+        { name: "John", birthday: "not-a-date" },
+        { name: "John", birthday: "2001-02-29" }, // Invalid leap year
+      ];
+
+      invalidFormats.forEach((person) => {
+        const result = validatePerson(person);
+        expect(result.success).toBe(false);
+        expect(result.error).toContain("birthday");
+      });
+    });
+
+    it("should accept valid leap year dates", () => {
+      const leapYearPerson = { name: "John", birthday: "2000-02-29" };
+      const result = validatePerson(leapYearPerson);
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe("parsePersonsJson", () => {
+    it("should parse valid JSON array of people", () => {
+      const validJson = JSON.stringify([
+        { name: "John Doe", birthday: "1990-06-15" },
+        { name: "Jane Smith", birthday: "1985-12-25" },
+      ]);
+
+      const result = parsePersonsJson(validJson);
+      expect(result.success).toBe(true);
+      expect(result.data).toHaveLength(2);
+      expect(result.data?.[0]).toEqual({
+        name: "John Doe",
+        birthday: "1990-06-15",
+      });
+      expect(result.data?.[1]).toEqual({
+        name: "Jane Smith",
+        birthday: "1985-12-25",
+      });
+    });
+
+    it("should handle empty or whitespace input", () => {
+      expect(parsePersonsJson("").success).toBe(false);
+      expect(parsePersonsJson("   ").success).toBe(false);
+      expect(parsePersonsJson("\n\t").success).toBe(false);
+    });
+
+    it("should reject invalid JSON syntax", () => {
+      const invalidJsons = [
+        "not json",
+        "{invalid: json}",
+        "[{name: 'missing quotes'}]",
+        '[{"name": "John", "birthday": "1990-06-15",}]', // trailing comma
+        '[{"name": "John" "birthday": "1990-06-15"}]', // missing comma
+      ];
+
+      invalidJsons.forEach((json) => {
+        const result = parsePersonsJson(json);
+        expect(result.success).toBe(false);
+        expect(result.error).toContain("JSON");
+      });
+    });
+
+    it("should reject non-array JSON", () => {
+      const nonArrayJsons = [
+        '{"name": "John", "birthday": "1990-06-15"}', // object
+        '"string"', // string
+        "123", // number
+        "true", // boolean
+        "null", // null
+      ];
+
+      nonArrayJsons.forEach((json) => {
+        const result = parsePersonsJson(json);
+        expect(result.success).toBe(false);
+        expect(result.error).toContain("array");
+      });
+    });
+
+    it("should reject empty arrays", () => {
+      const result = parsePersonsJson("[]");
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("empty");
+    });
+
+    it("should validate each person in the array", () => {
+      const jsonWithInvalidPerson = JSON.stringify([
+        { name: "John Doe", birthday: "1990-06-15" },
+        { name: "", birthday: "1985-12-25" }, // invalid: empty name
+        { name: "Jane Smith", birthday: "1980-01-01" },
+      ]);
+
+      const result = parsePersonsJson(jsonWithInvalidPerson);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("index 1");
+      expect(result.error).toContain("empty");
+    });
+
+    it("should detect duplicate names (case insensitive)", () => {
+      const jsonWithDuplicates = JSON.stringify([
+        { name: "John Doe", birthday: "1990-06-15" },
+        { name: "jane smith", birthday: "1985-12-25" },
+        { name: "JOHN DOE", birthday: "1980-01-01" }, // duplicate
+      ]);
+
+      const result = parsePersonsJson(jsonWithDuplicates);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("Duplicate");
+      expect(result.error).toContain("john doe");
+    });
+
+    it("should handle various error scenarios with descriptive messages", () => {
+      // Invalid person at specific index
+      const invalidPersonJson = JSON.stringify([
+        { name: "John", birthday: "1990-06-15" },
+        { name: "Jane", birthday: "invalid-date" },
+      ]);
+
+      const result = parsePersonsJson(invalidPersonJson);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("index 1");
+      expect(result.error).toContain("birthday");
+    });
+
+    it("should handle real-world sample data", () => {
+      const sampleJson = JSON.stringify([
+        { name: "Tyrion Lannister", birthday: "1978-12-02" },
+        { name: "Cersei Lannister", birthday: "1975-11-30" },
+        { name: "Daenerys Targaryen", birthday: "1991-11-24" },
+      ]);
+
+      const result = parsePersonsJson(sampleJson);
+      expect(result.success).toBe(true);
+      expect(result.data).toHaveLength(3);
+      expect(result.data?.[0].name).toBe("Tyrion Lannister");
+    });
+
+    it("should handle edge cases with special characters in names", () => {
+      const specialCharJson = JSON.stringify([
+        { name: "José María", birthday: "1990-06-15" },
+        { name: "李小明", birthday: "1985-12-25" },
+        { name: "O'Connor", birthday: "1980-01-01" },
+        { name: "Smith-Jones", birthday: "1975-05-10" },
+      ]);
+
+      const result = parsePersonsJson(specialCharJson);
+      expect(result.success).toBe(true);
+      expect(result.data).toHaveLength(4);
+    });
+
+    it("should handle leap year validation in JSON parsing", () => {
+      const leapYearJson = JSON.stringify([
+        { name: "Leap Year Baby", birthday: "2000-02-29" },
+        { name: "Regular Person", birthday: "1990-06-15" },
+      ]);
+
+      const result = parsePersonsJson(leapYearJson);
+      expect(result.success).toBe(true);
+      expect(result.data).toHaveLength(2);
+
+      // Test invalid leap year
+      const invalidLeapYearJson = JSON.stringify([
+        { name: "Invalid Leap", birthday: "2001-02-29" },
+      ]);
+
+      const invalidResult = parsePersonsJson(invalidLeapYearJson);
+      expect(invalidResult.success).toBe(false);
+      expect(invalidResult.error).toContain("birthday");
+    });
+  });
+
+  describe("JSON Parsing Integration Tests", () => {
+    it("should handle complete workflow from JSON to validated data", () => {
+      const inputJson = JSON.stringify([
+        { name: "  Alice Johnson  ", birthday: "1992-03-15" },
+        { name: "Bob Wilson", birthday: "1988-07-22" },
+        { name: "Charlie Brown", birthday: "2000-02-29" },
+      ]);
+
+      const result = parsePersonsJson(inputJson);
+
+      expect(result.success).toBe(true);
+      expect(result.data).toHaveLength(3);
+
+      // Check that names are trimmed
+      expect(result.data?.[0].name).toBe("Alice Johnson");
+
+      // Check that all birthdays are valid
+      result.data?.forEach((person) => {
+        expect(isValidDateFormat(person.birthday)).toBe(true);
+      });
+
+      // Check leap year handling
+      expect(result.data?.[2].birthday).toBe("2000-02-29");
+    });
+
+    it("should provide helpful error messages for debugging", () => {
+      const testCases = [
+        {
+          json: "",
+          expectedError: "empty",
+        },
+        {
+          json: "invalid json",
+          expectedError: "Invalid JSON",
+        },
+        {
+          json: "{}",
+          expectedError: "array",
+        },
+        {
+          json: "[]",
+          expectedError: "empty",
+        },
+        {
+          json: JSON.stringify([{ name: "John" }]),
+          expectedError: "birthday",
+        },
+        {
+          json: JSON.stringify([{ birthday: "1990-01-01" }]),
+          expectedError: "name",
+        },
+        {
+          json: JSON.stringify([{ name: "", birthday: "1990-01-01" }]),
+          expectedError: "empty",
+        },
+        {
+          json: JSON.stringify([{ name: "John", birthday: "invalid" }]),
+          expectedError: "birthday",
+        },
+      ];
+
+      testCases.forEach(({ json, expectedError }) => {
+        const result = parsePersonsJson(json);
+        expect(result.success).toBe(false);
+        expect(result.error?.toLowerCase()).toContain(
+          expectedError.toLowerCase(),
+        );
+      });
     });
   });
 });
