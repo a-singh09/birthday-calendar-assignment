@@ -11,6 +11,7 @@ import {
   sortPeopleByAge,
   assignColorsWithinDays,
   organizeIntoCalendarData,
+  calculateSquareSize,
 } from "./index";
 
 describe("Date Calculation Utilities", () => {
@@ -1187,5 +1188,75 @@ describe("Data Processing Pipeline", () => {
         }
       });
     });
+  });
+});
+describe("calculateSquareSize", () => {
+  it("should calculate optimal square size for small number of people", () => {
+    // Container width 200px, 1 person
+    expect(calculateSquareSize(200, 1)).toBe(80); // Max size limit
+
+    // Container width 200px, 4 people (2x2 grid)
+    expect(calculateSquareSize(200, 4)).toBe(80); // Max size limit
+
+    // Container width 100px, 4 people (2x2 grid)
+    // Available width: 100 - (2-1)*4 = 96px
+    // Square size: 96/2 = 48px
+    expect(calculateSquareSize(100, 4)).toBe(48);
+  });
+
+  it("should handle large number of people", () => {
+    // Container width 200px, 16 people (4x4 grid)
+    // Available width: 200 - (4-1)*4 = 188px
+    // Square size: 188/4 = 47px
+    expect(calculateSquareSize(200, 16)).toBe(47);
+
+    // Container width 200px, 25 people (5x5 grid)
+    // Available width: 200 - (5-1)*4 = 184px
+    // Square size: 184/5 = 36px
+    expect(calculateSquareSize(200, 25)).toBe(36);
+  });
+
+  it("should respect minimum size constraint", () => {
+    // Very small container with many people
+    expect(calculateSquareSize(50, 100)).toBe(20); // Min size limit
+    expect(calculateSquareSize(10, 10)).toBe(20); // Min size limit
+  });
+
+  it("should respect maximum size constraint", () => {
+    // Large container with few people
+    expect(calculateSquareSize(1000, 1)).toBe(80); // Max size limit
+    expect(calculateSquareSize(500, 2)).toBe(80); // Max size limit
+  });
+
+  it("should handle zero people", () => {
+    expect(calculateSquareSize(200, 0)).toBe(20); // Min size
+  });
+
+  it("should handle custom gap, min, and max values", () => {
+    // Custom gap of 8px instead of 4px
+    // Container 100px, 4 people, gap 8px
+    // Available width: 100 - (2-1)*8 = 92px
+    // Square size: 92/2 = 46px
+    expect(calculateSquareSize(100, 4, 8)).toBe(46);
+
+    // Custom min size of 30px
+    expect(calculateSquareSize(50, 100, 4, 30)).toBe(30);
+
+    // Custom max size of 60px
+    expect(calculateSquareSize(1000, 1, 4, 20, 60)).toBe(60);
+  });
+
+  it("should calculate grid layout correctly", () => {
+    // 9 people should use 3x3 grid
+    // Container 150px, gap 4px
+    // Available width: 150 - (3-1)*4 = 142px
+    // Square size: 142/3 = 47px
+    expect(calculateSquareSize(150, 9)).toBe(47);
+
+    // 10 people should use 4x3 grid (ceil(sqrt(10)) = 4)
+    // Container 200px, gap 4px
+    // Available width: 200 - (4-1)*4 = 188px
+    // Square size: 188/4 = 47px
+    expect(calculateSquareSize(200, 10)).toBe(47);
   });
 });

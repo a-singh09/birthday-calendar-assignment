@@ -293,6 +293,37 @@ export function assignColorsWithinDays(peopleByDay: {
 }
 
 /**
+ * Calculate optimal square size based on container width and person count
+ * @param containerWidth - Available width of the container in pixels
+ * @param personCount - Number of people to display
+ * @param gap - Gap between squares in pixels (default: 4)
+ * @param minSize - Minimum square size in pixels (default: 20)
+ * @param maxSize - Maximum square size in pixels (default: 80)
+ * @returns Optimal square size in pixels
+ */
+export function calculateSquareSize(
+  containerWidth: number,
+  personCount: number,
+  gap: number = 4,
+  minSize: number = 20,
+  maxSize: number = 80,
+): number {
+  if (personCount === 0) return minSize;
+
+  // Calculate optimal number of squares per row
+  const maxSquaresPerRow = Math.ceil(Math.sqrt(personCount));
+
+  // Calculate available width accounting for gaps
+  const availableWidth = containerWidth - (maxSquaresPerRow - 1) * gap;
+
+  // Calculate square size
+  const calculatedSize = Math.floor(availableWidth / maxSquaresPerRow);
+
+  // Ensure size is within bounds
+  return Math.max(minSize, Math.min(maxSize, calculatedSize));
+}
+
+/**
  * Organize processed people into CalendarData structure
  * Groups people by day of week, sorts by age within each day, and assigns colors
  * @param people - Array of Person objects

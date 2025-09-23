@@ -9,4 +9,4 @@ export * from "../types";
 export { InputSection } from "./InputSection";
 export { CalendarSection } from "./CalendarSection";
 export { DayColumn } from "./DayColumn";
-// Additional components will be exported as they are implemented
+export { default as PersonSquare } from "./PersonSquare";
