@@ -22,8 +22,8 @@ const PersonSquare: React.FC<PersonSquareProps> = ({ person, size }) => {
   // Enhanced tooltip text with person details
   const tooltipText = `${person.name} (Age: ${person.age})`;
 
-  // Detailed tooltip content
-  const detailedTooltip = `${person.name}\nDate of Birth: ${formatDateOfBirth(person.birthday)}\nAge: ${person.age}`;
+  // Detailed tooltip content with better formatting
+  const detailedTooltip = `${person.name}\n${formatDateOfBirth(person.birthday)}\nAge: ${person.age}`;
 
   return (
     <div className="person-square-wrapper">

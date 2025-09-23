@@ -1,53 +1,33 @@
 /**
  * DayColumn component - displays people for a specific day of the week
+ * Updated to use compact grid layout like the reference image
  */
 
-import React, { useRef, useEffect, useState } from "react";
+import React from "react";
 import type { DayColumnProps } from "../../types";
 import { PersonSquare } from "../";
-import { calculateSquareSize } from "../../utils";
 
 export function DayColumn({ dayName, people, isEmpty }: DayColumnProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [squareSize, setSquareSize] = useState(40); // Default size
-
-  useEffect(() => {
-    const updateSquareSize = () => {
-      if (containerRef.current && people.length > 0) {
-        const containerWidth = containerRef.current.offsetWidth;
-        const newSize = calculateSquareSize(containerWidth, people.length);
-        setSquareSize(newSize);
-      }
-    };
-
-    // Initial calculation
-    updateSquareSize();
-
-    // Update on window resize
-    window.addEventListener("resize", updateSquareSize);
-
-    return () => {
-      window.removeEventListener("resize", updateSquareSize);
-    };
-  }, [people.length]);
-
-  const containerStyle: React.CSSProperties = {
-    display: "grid",
-    gap: "4px",
-    gridTemplateColumns: `repeat(auto-fit, minmax(${squareSize}px, 1fr))`,
-    justifyItems: "center",
-    alignItems: "center",
+  // Calculate optimal grid layout based on number of people
+  const getGridColumns = (count: number) => {
+    if (count <= 2) return 2;
+    if (count <= 4) return 2;
+    if (count <= 6) return 3;
+    if (count <= 9) return 3;
+    return 4;
   };
+
+  const gridColumns = getGridColumns(people.length);
 
   return (
     <div
-      className={`day-column ${isEmpty ? "day-empty" : ""}`}
+      className={`day-column-grid ${isEmpty ? "day-empty" : ""}`}
       role="region"
       aria-label={`${dayName} birthdays`}
       aria-describedby={`${dayName.toLowerCase()}-header`}
     >
       <div
-        className="day-header"
+        className="day-header-grid"
         id={`${dayName.toLowerCase()}-header`}
         role="heading"
         aria-level={3}
@@ -55,9 +35,10 @@ export function DayColumn({ dayName, people, isEmpty }: DayColumnProps) {
         {dayName}
       </div>
       <div
-        className="person-squares-container"
-        ref={containerRef}
-        style={containerStyle}
+        className="person-grid-container"
+        style={{
+          gridTemplateColumns: `repeat(${gridColumns}, 1fr)`,
+        }}
         role="group"
         aria-label={
           isEmpty
@@ -69,8 +50,8 @@ export function DayColumn({ dayName, people, isEmpty }: DayColumnProps) {
         }
       >
         {isEmpty ? (
-          <div className="empty-day-message" aria-live="polite" role="status">
-            No birthdays
+          <div className="empty-grid-message" aria-live="polite" role="status">
+            {/* Empty state - no visual content needed */}
           </div>
         ) : (
           <>
@@ -82,7 +63,7 @@ export function DayColumn({ dayName, people, isEmpty }: DayColumnProps) {
               <PersonSquare
                 key={`${person.name}-${personIndex}`}
                 person={person}
-                size={squareSize}
+                size={45} // Fixed size for grid layout
               />
             ))}
           </>
